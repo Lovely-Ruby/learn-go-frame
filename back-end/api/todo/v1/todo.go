@@ -11,7 +11,7 @@ import (
 // 增加
 type CreateReq struct {
 	g.Meta `path:"/todo" method:"post" tags:"Todo" summary:"Create Todo"`
-	Title  string `v:"required|length:1,10" dc:"todo title"`
+	Title  string `v:"required|min-length:1" dc:"todo title"`
 }
 
 type CreateRes struct {

@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 
 	"back-end/internal/controller/hello"
+	"back-end/internal/controller/todo"
 )
 
 var (
@@ -21,6 +22,7 @@ var (
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					hello.NewV1(),
+					todo.NewV1(),
 				)
 			})
 			s.Run()
