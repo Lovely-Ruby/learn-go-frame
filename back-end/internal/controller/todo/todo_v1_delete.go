@@ -3,12 +3,11 @@ package todo
 import (
 	"context"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-
-	"back-end/api/todo/v1"
+	v1 "back-end/api/todo/v1"
+	"back-end/internal/dao"
 )
 
 func (c *ControllerV1) Delete(ctx context.Context, req *v1.DeleteReq) (res *v1.DeleteRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	_, err = dao.Todo.Ctx(ctx).WherePri(req.Id).Delete()
+	return
 }

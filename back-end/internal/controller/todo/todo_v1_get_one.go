@@ -3,12 +3,12 @@ package todo
 import (
 	"context"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-
-	"back-end/api/todo/v1"
+	v1 "back-end/api/todo/v1"
+	"back-end/internal/dao"
 )
 
 func (c *ControllerV1) GetOne(ctx context.Context, req *v1.GetOneReq) (res *v1.GetOneRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	res = &v1.GetOneRes{}
+	err = dao.Todo.Ctx(ctx).WherePri(req.Id).Scan(&res.Todo)
+	return
 }

@@ -12,9 +12,11 @@ func (c *ControllerV1) Create(ctx context.Context, req *v1.CreateReq) (res *v1.C
 	insertId, err := dao.Todo.Ctx(ctx).Data(do.Todo{
 		Title: req.Title,
 	}).InsertAndGetId()
+
 	if err != nil {
 		return nil, err
 	}
+
 	res = &v1.CreateRes{
 		Id: insertId,
 	}
