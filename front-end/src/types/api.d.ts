@@ -23,4 +23,12 @@ declare namespace Api {
         code: number
         message: string
     }
+
+    interface TodoCreateResponse {
+        title: string
+        done: number // 0 未完成；1 已完成
+    }
+    interface TodoDeleteResponse {
+
+    }
 }
