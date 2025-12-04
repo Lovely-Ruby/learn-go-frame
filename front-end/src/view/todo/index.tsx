@@ -1,4 +1,4 @@
-import { CheckOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
+import { CheckOutlined, DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useRequest } from 'alova/client'
 import {
     Button,
@@ -48,7 +48,7 @@ export function PageTodo() {
     })
 
     // =========================
-    // 📌 创建 / 更新 / 删除 / 完成
+    // 📌 CRUD + 完成 + 恢复
     // =========================
     const { send: doCreate, loading: creating }
         = useRequest(() => alovaInstance.Post<Api.TodoCreateResponse>('/todo', { title: titleInput }), { immediate: false })
@@ -58,6 +58,10 @@ export function PageTodo() {
 
     const { send: doFinish }
         = useRequest((id: number) => alovaInstance.Put<Api.TodoUpdateResponse>(`/todo/${id}`, { done: 1 }), { immediate: false })
+
+    // ⭐ 新增：恢复为待办
+    const { send: doUnFinish }
+        = useRequest((id: number) => alovaInstance.Put<Api.TodoUpdateResponse>(`/todo/${id}`, { done: 0 }), { immediate: false })
 
     const { send: doDelete }
         = useRequest((id: number) => alovaInstance.Delete<Api.TodoDeleteResponse>(`/todo/${id}`), { immediate: false })
@@ -82,6 +86,12 @@ export function PageTodo() {
     const handleFinish = async (id: number) => {
         await doFinish(id)
         message.success('已标记为完成')
+        refreshList()
+    }
+
+    const handleUnFinish = async (id: number) => {
+        await doUnFinish(id)
+        message.success('已恢复为待办')
         refreshList()
     }
 
@@ -118,7 +128,7 @@ export function PageTodo() {
     }
 
     // =========================
-    // ✨ UI 渲染
+    // ✨ UI Render
     // =========================
     if (error) {
         return (
@@ -131,7 +141,6 @@ export function PageTodo() {
 
     return (
         <div style={{ padding: 24, maxWidth: 650, margin: '0 auto' }}>
-            {/* 头部 */}
             <Space style={{ width: '100%', justifyContent: 'space-between', marginBottom: 16 }}>
                 <Title level={3} style={{ margin: 0 }}>📝 待办中心</Title>
                 <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
@@ -139,110 +148,109 @@ export function PageTodo() {
                 </Button>
             </Space>
 
-            {/* Tabs */}
             <Tabs
                 activeKey={tabKey}
                 onChange={key => setTabKey(key as any)}
                 items={[
                     { key: 'all', label: '全部' },
-                    { key: 'todo', label: '待办' },
+                    { key: 'todo', label: '未完成' },
                     { key: 'done', label: '已完成' },
                 ]}
             />
 
-            <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
-                {loading
-                    ? (
-                        <div style={{ padding: '50px 0', textAlign: 'center' }}>
-                            <Spin size="large" />
-                        </div>
-                    )
-                    : filteredList.length === 0
-                        ? (
-                            <Empty
-                                description="暂无数据"
-                                style={{ padding: '40px 0' }}
-                            />
-                        )
-                        : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {filteredList.map(item => (
-                                    <Card
-                                        key={item.id}
-                                        size="small"
-                                        style={{
-                                            borderRadius: 10,
-                                            background: item.done ? '#fafafa' : '#fff',
-                                            transition: '0.25s',
-                                        }}
-                                        hoverable
-                                        extra={(
-                                            <Space size={4}>
-                                                {item.done === 0 && (
-                                                    <Tooltip title="标记完成">
-                                                        <Button
-                                                            icon={<CheckOutlined />}
-                                                            type="text"
-                                                            onClick={() => handleFinish(item.id)}
-                                                        />
-                                                    </Tooltip>
-                                                )}
-
-                                                <Tooltip title="编辑">
-                                                    <Button
-                                                        icon={<EditOutlined />}
-                                                        type="text"
-                                                        onClick={() => openEditModal(item)}
-                                                    />
-                                                </Tooltip>
-
-                                                <Tooltip title="删除">
-                                                    <Button
-                                                        icon={<DeleteOutlined />}
-                                                        danger
-                                                        type="text"
-                                                        onClick={() => handleDelete(item.id)}
-                                                    />
-                                                </Tooltip>
-                                            </Space>
+            <Card style={{ borderRadius: 12 }}>
+                {loading ? (
+                    <div style={{ padding: '50px 0', textAlign: 'center' }}>
+                        <Spin size="large" />
+                    </div>
+                ) : filteredList.length === 0 ? (
+                    <Empty description="暂无数据" style={{ padding: '40px 0' }} />
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {filteredList.map(item => (
+                            <Card
+                                key={item.id}
+                                size="small"
+                                style={{
+                                    borderRadius: 10,
+                                    background: item.done ? '#fafafa' : '#fff',
+                                }}
+                                hoverable
+                                extra={(
+                                    <Space size={4}>
+                                        {/* ========== 未完成 → 完成 ========== */}
+                                        {item.done === 0 && (
+                                            <Tooltip title="标记完成">
+                                                <Button
+                                                    icon={<CheckOutlined />}
+                                                    type="text"
+                                                    onClick={() => handleFinish(item.id)}
+                                                />
+                                            </Tooltip>
                                         )}
+
+                                        {/* ========== 已完成 → 恢复为待办 ========== */}
+                                        {item.done === 1 && (
+                                            <Tooltip title="恢复为待办">
+                                                <Button
+                                                    icon={<ReloadOutlined />}
+                                                    type="text"
+                                                    onClick={() => handleUnFinish(item.id)}
+                                                />
+                                            </Tooltip>
+                                        )}
+
+                                        <Tooltip title="编辑">
+                                            <Button
+                                                icon={<EditOutlined />}
+                                                type="text"
+                                                onClick={() => openEditModal(item)}
+                                            />
+                                        </Tooltip>
+
+                                        <Tooltip title="删除">
+                                            <Button
+                                                icon={<DeleteOutlined />}
+                                                danger
+                                                type="text"
+                                                onClick={() => handleDelete(item.id)}
+                                            />
+                                        </Tooltip>
+                                    </Space>
+                                )}
+                            >
+                                <div style={{ fontSize: 16, fontWeight: 500 }}>
+                                    <span
+                                        style={{
+                                            textDecoration: item.done ? 'line-through' : 'none',
+                                            color: item.done ? '#999' : '#333',
+                                        }}
                                     >
-                                        <div style={{ fontSize: 16, fontWeight: 500 }}>
-                                            <span
-                                                style={{
-                                                    textDecoration: item.done ? 'line-through' : 'none',
-                                                    color: item.done ? '#999' : '#333',
-                                                }}
-                                            >
-                                                {item.title}
-                                            </span>
-                                        </div>
+                                        {item.title}
+                                    </span>
+                                </div>
 
-                                        <div style={{ marginTop: 4, fontSize: 12, color: '#999' }}>
-                                            {item.done
-                                                ? (
-                                                    <Tag color="green">已完成</Tag>
-                                                )
-                                                : (
-                                                    <Tag color="blue">待办</Tag>
-                                                )}
+                                <div style={{ marginTop: 4, fontSize: 12, color: '#999' }}>
+                                    {item.done
+                                        ? <Tag color="green">已完成</Tag>
+                                        : <Tag color="blue">待办</Tag>}
 
-                                            <span style={{ marginLeft: 8 }}>
-                                                创建：
-                                                {item.createdAt}
-                                            </span>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
+                                    <span style={{ marginLeft: 8 }}>
+                                        创建：
+                                        {item.createdAt}
+                                    </span>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </Card>
 
-            {/* =========================
-                🪄 新增 / 编辑 Modal
-            ========================= */}
+            {/* Modal */}
             <Modal
-                title={modalType === 'create' ? '新增待办事项' : '编辑待办事项'}
+                title={modalType === 'create'
+                    ? '新增待办事项'
+                    : '编辑待办事项'}
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
                 onOk={handleModalOk}
