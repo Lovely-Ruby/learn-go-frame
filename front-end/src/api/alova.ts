@@ -3,6 +3,8 @@
 import { createAlova } from 'alova'
 import adapterFetch from 'alova/fetch'
 import ReactHook from 'alova/react'
+// 引入 antd 的 message 组件
+import { message } from 'antd'
 
 export const alovaInstance = createAlova({
     baseURL: '/api/v1',
@@ -15,6 +17,7 @@ export const alovaInstance = createAlova({
         onSuccess: async (response) => {
             // 如果 HTTP 状态码不是 2xx，抛出错误，Alova 会捕获
             if (response.status >= 300) {
+                message.error(`HTTP 错误: ${response.status} ${response.statusText}`)
                 throw new Error(`HTTP 错误: ${response.status} ${response.statusText}`)
             }
 
@@ -22,6 +25,7 @@ export const alovaInstance = createAlova({
 
             // 步骤 2：处理业务状态码 (Business Code)
             if (json.code !== 0) {
+                message.error(json.message || '后端返回业务错误')
                 // 如果后端返回的 code 不为 0，抛出错误，Alova 会将 useRequest 的 error 状态设为 true
                 throw new Error(json.message || '后端返回业务错误')
             }
@@ -32,6 +36,7 @@ export const alovaInstance = createAlova({
         onError: (err) => {
             // 处理网络请求本身失败（如断网）的情况
             console.error('网络请求失败', err)
+            message.error(err.message || '网络请求失败')
             throw new Error(err.message || '网络请求失败')
         },
     },
