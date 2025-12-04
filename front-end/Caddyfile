@@ -1,0 +1,19 @@
+:80 {
+	# 静态文件根目录
+	root * /usr/share/caddy
+
+	# 1. 优先处理 API 请求（使用 handle 强制隔离和执行）
+	# 只要路径匹配 /api/*，就执行反向代理，并停止处理。
+	handle /api/* {
+		reverse_proxy http://host.docker.internal:8000
+	}
+
+	# 2. 处理所有其他请求 (前端路由和静态文件)
+	handle {
+		# 静态文件服务
+		file_server
+
+		# SPA 路由回退：如果文件不存在，返回 index.html
+		try_files {path} /index.html
+	}
+}

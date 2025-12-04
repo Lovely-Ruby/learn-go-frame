@@ -7,7 +7,7 @@ import { defineConfig, loadEnv } from 'vite'
 // https://vite.dev/config/
 export default defineConfig((configEnv) => {
     const viteEnv = loadEnv(configEnv.mode, process.cwd())
-    console.log('viteEnv:>>', viteEnv)
+    // console.log('viteEnv:>>', viteEnv)
     return {
         plugins: [react(), tailwindcss()],
         resolve: {
