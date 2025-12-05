@@ -5,7 +5,9 @@
 	# 1. 优先处理 API 请求（使用 handle 强制隔离和执行）
 	# 只要路径匹配 /api/*，就执行反向代理，并停止处理。
 	handle /api/* {
-		reverse_proxy http://host.docker.internal:8000
+		# reverse_proxy http://host.docker.internal:8000
+		# 'backend' 是你的 docker-compose.yaml 中定义的服务名
+		reverse_proxy backend:8000
 	}
 
 	# 2. 处理所有其他请求 (前端路由和静态文件)

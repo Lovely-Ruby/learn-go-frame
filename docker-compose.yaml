@@ -1,0 +1,52 @@
+# docker-compose.yaml 文件 - 最终修正版
+version: '3.8'
+
+services:
+  # === 1. 后端服务 (GoFrame) ===
+  backend:
+    build:
+      context: ./back-end 
+      dockerfile: manifest/docker/Dockerfile
+    container_name: goframe_backend
+    ports:
+      - "8000:8000"
+    environment: 
+      # ✅ GoFrame 应用的连接配置，主机名必须是 'db'
+      - GF_DATABASE_DEFAULT_LINK=mysql:gouser:gopassword@tcp(db:3306)/todo_db
+    depends_on:
+      - db
+
+  # === 2. 前端服务 (React + Caddy) ===
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  # === 3. 数据库服务 (MySQL) ===
+  db:
+    image: mysql:8.0
+    container_name: todo_database
+    # ports: # 通常不需要暴露 3306
+    environment:
+      # ✅ MySQL 容器初始化所需的变量 (数据库的用户名和密码在这里定义)
+      MYSQL_ROOT_PASSWORD: gopassword # 确保设置 ROOT 密码
+      MYSQL_USER: gouser             # 你的应用用户 (与 backend 连接字符串一致)
+      MYSQL_PASSWORD: gopassword     # 你的应用密码 (与 backend 连接字符串一致)
+      MYSQL_DATABASE: todo_db        # 你的数据库名 (与 backend 连接字符串一致)
+      # 移除错误的 GF_DATABASE_DEFAULT_LINK 变量
+    volumes:
+      # 数据持久化卷保持不变
+      - db_data:/var/lib/mysql
+      # ✅ 新增：挂载初始化脚本
+      - ./back-end/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+
+# === Docker 卷 (Volume) 定义 ===
+volumes:
+  db_data:
+    driver: local

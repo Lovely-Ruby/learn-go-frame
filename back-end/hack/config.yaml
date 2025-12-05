@@ -9,6 +9,3 @@ gfcli:
     build: "-s linux -a arm64 -p temp -ew"
     tagPrefixes:
       - my.image.pub/my-app
-    # 如果想自动传入端口，可以写 env
-    env:
-      - APP_PORT=8000

@@ -12,8 +12,7 @@ COPY . .
 
 # Build
 RUN go mod tidy
-# 构建 linux/arm64 架构（适配 m1 芯片）
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main .
 
 # Stage 2: Production
 FROM alpine:3.18
@@ -29,7 +28,13 @@ COPY --from=builder /app/main/main $WORKDIR/main
 RUN chmod +x $WORKDIR/main
 
 # Copy resources
-COPY resource $WORKDIR/resource
+COPY resource /app/main/resource
+
+# Copy config
+COPY manifest/config/config.yaml $WORKDIR/manifest/config/
 
 WORKDIR $WORKDIR
+
+EXPOSE 8000
+
 CMD ["./main"]
