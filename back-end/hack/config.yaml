@@ -1,6 +1,3 @@
-
-# CLI tool, only in development environment.
-# https://goframe.org/docs/cli
 gfcli:
   gen:
     dao:
@@ -8,6 +5,10 @@ gfcli:
         descriptionTag: true
 
   docker:
-    build: "-s linux -p temp -ew"
+    # 在 mac m1（arm64 架构）下构建 linux/arm64 镜像
+    build: "-s linux -a arm64 -p temp -ew"
     tagPrefixes:
       - my.image.pub/my-app
+    # 如果想自动传入端口，可以写 env
+    env:
+      - APP_PORT=8000

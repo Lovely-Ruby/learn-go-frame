@@ -1,43 +1,34 @@
-# ---------- 1. Builder 阶段 ----------
-FROM golang:1.22-alpine AS builder
+# Stage 1: Builder
+FROM golang:1.23-alpine AS builder
 
-# 设置环境变量（GoFrame 建议关闭 CGO）
-ENV CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+WORKDIR /app/main
 
-WORKDIR /app
-
-# 安装 git（用于 go mod 下载）
-RUN apk add --no-cache git
-
-# 复制 go.mod、go.sum，提前下载依赖（加速构建）
+# Copy go.mod and go.sum
 COPY go.mod go.sum ./
 RUN go mod download
 
-# 复制所有代码
+# Copy the rest
 COPY . .
 
-# 编译二进制
-RUN go build -o server main.go
+# Build
+RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main .
 
+# Stage 2: Production
+FROM alpine:3.18
 
-# ---------- 2. 最终运行阶段 ----------
-# 使用更小的容器
-FROM alpine:3.20
+LABEL maintainer="john@goframe.org"
 
-WORKDIR /app
+ENV WORKDIR /app/main
 
-# 复制编译的可执行文件
-COPY --from=builder /app/server .
+RUN mkdir -p $WORKDIR
 
-# 如果用到了配置文件（config.yaml/sql等），补充复制
-COPY config/ ./config/
-# 或你的具体路径，比如：
-# COPY manifest/config/config.yaml ./config.yaml
+# Copy binary
+COPY --from=builder /app/main/main $WORKDIR/main
+RUN chmod +x $WORKDIR/main
 
-# 运行端口（按你的 GoFrame 默认配置调整）
-EXPOSE 8000
+# Copy resources
+COPY resource $WORKDIR/resource
 
-# 启动
-CMD ["./server"]
+WORKDIR $WORKDIR
+CMD ["./main"]
