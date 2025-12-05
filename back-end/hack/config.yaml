@@ -1,7 +1,7 @@
 gfcli:
   gen:
     dao:
-      - link: "mysql:root:123456@tcp(127.0.0.1:3306)/todo_app_go_frame"
+      - link: "mysql:root:123456@tcp(127.0.0.1:3306)/todo_db"
         descriptionTag: true
 
   docker:

@@ -19,5 +19,5 @@ database:
   default:
     # 彻底修正：使用 Docker 服务名 'db'
     # 使用我们在 docker-compose.yaml 中定义的用户名、密码和数据库名
-    link: "mysql:gouser:gopassword@tcp(db:3306)/todo_db" 
+    link: "mysql:gouser:gopassword@tcp(db:3306)/todo_db?charset=utf8mb4"
     debug: true

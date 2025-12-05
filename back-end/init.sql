@@ -1,7 +1,7 @@
--- back-end/init.sql
+-- back-end/init.sql - 修正后的版本
 
 -- 检查并创建 todo 表
-CREATE TABLE IF NOT EXISTS `todo` (
+CREATE TABLE IF NOT EXISTS `todo` (  
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `title` VARCHAR(255) NOT NULL COMMENT '待办事项内容',
   `done` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '是否完成 0:未完成 1:已完成',
