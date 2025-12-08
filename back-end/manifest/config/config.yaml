@@ -10,14 +10,15 @@ logger:
   stdout: true
 
 # https://goframe.org/docs/core/gdb-config-file
+# 本地开发用
 # database:
 #   default:
-#     link: "mysql:root:123456@tcp(127.0.0.1:3306)/todo_app_go_frame"
+#     link: "mysql:root:123456@tcp(127.0.0.1:3306)/todo_app_go_frame?charset=utf8mb4"
 #     debug: true
 
+
+# docker 容器用
 database:
-  default:
-    # 彻底修正：使用 Docker 服务名 'db'
-    # 使用我们在 docker-compose.yaml 中定义的用户名、密码和数据库名
-    link: "mysql:gouser:gopassword@tcp(db:3306)/todo_db?charset=utf8mb4"
+   default:
+    link: "mysql:gouser:gopassword@tcp(db:3306)/todo_db?charset=utf8mb4" 
     debug: true
