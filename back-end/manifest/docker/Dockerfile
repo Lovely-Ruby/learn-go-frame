@@ -31,7 +31,11 @@ RUN chmod +x $WORKDIR/main
 COPY resource /app/main/resource
 
 # Copy config
-COPY manifest/config/config.yaml $WORKDIR/manifest/config/
+# 只复制 config-docker => 容器中的 config，因为只能读取到 config
+# 之前不生效的写法是
+# - COPY manifest/config/config-docker.yaml $WORKDIR/manifest/config/
+# 没有改文件名，导致加载不到配置
+COPY manifest/config/config-docker.yaml $WORKDIR/manifest/config/config.yaml
 
 WORKDIR $WORKDIR
 
