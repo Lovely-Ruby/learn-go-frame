@@ -1,0 +1,16 @@
+# 索引性能测试配置文件
+server:
+  address: ":8000"
+
+logger:
+  level: "all"
+  stdout: true
+
+# 数据库配置 - 请根据你的实际环境修改
+database:
+  default:
+    link: "mysql:root:123456@tcp(127.0.0.1:3306)/todo_app_go_frame?charset=utf8mb4"
+    debug: true
+    maxIdle: 10
+    maxOpen: 100
+    maxLifetime: 30s
